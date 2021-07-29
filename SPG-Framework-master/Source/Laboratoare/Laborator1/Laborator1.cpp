@@ -439,6 +439,26 @@ void Laborator1::OnKeyPress(int key, int mods)
 	{
 		switchToSuperpixels = (switchToSuperpixels + 1) % 2;
 	}
+
+	if (key == GLFW_KEY_1)
+	{
+		switchToSuperpixels = 1;
+	}
+
+	if (key == GLFW_KEY_2)
+	{
+		switchToSuperpixels = 2;
+	}
+
+	if (key == GLFW_KEY_3)
+	{
+		switchToSuperpixels = 3;
+	}
+
+	if (key == GLFW_KEY_4)
+	{
+		switchToSuperpixels = 4;
+	}
 };
 
 void Laborator1::OnKeyRelease(int key, int mods)

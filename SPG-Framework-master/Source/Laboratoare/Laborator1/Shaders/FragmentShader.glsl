@@ -42,14 +42,13 @@ struct Superpixel
 };
 
 layout(std430, binding = 0) buffer superpixels {
-	//int nr_superpixels;
 	Superpixel data[];
 };
 
 layout(location = 0) out vec3 out_color;
 
 
-vec3 ambientLightAllPixelsWRONG()
+vec3 ambientLightAllPixelsWRONG() // varianta cu texelFetch care da erroare
 {
 	vec3 ambient = vec3(0);
 	vec3 pos = FragPosLightSpace.xyz / FragPosLightSpace.w;
@@ -83,7 +82,7 @@ vec3 ambientLightAllPixelsWRONG()
 	return ambient;
 }
 
-vec3 ambientLightAllPixels()
+vec3 ambientLightAllPixels() 
 {
 	vec3 ambient = vec3(0);
 	vec3 pos = FragPosLightSpace.xyz / FragPosLightSpace.w;
@@ -242,14 +241,20 @@ void main()
 	//```````````````````````````````````````
 	//ambient
 	vec3 ambient;
-	if (switchToSuperpixels == 1) {
-		ambient = ambientLight()* 0.4;
+	switch (switchToSuperpixels) {
+	case 1: // RSM 
+		ambient = ambientLight() * 0.4;
+		break;
+	case 2: // RSMC -> cu aria
+		ambient = ambientLight2() * 0.003;
+		break;
+	case 3: // exaluare toti pixeli texelFetch
+		ambient = ambientLightAllPixelsWRONG() * 0.3;
+		break;
+	default: // exaluare toti pixeli texture 
+		ambient = ambientLightAllPixels() * 0.003;
 	}
-	else {
-		ambient = ambientLight2()* 0.003;
-		//ambient = ambientLightAllPixelsWRONG() * 0.3;
-	}
-	 
+ 
 
 	//diffuse
 	vec3 lightColor = vec3(1.0);
