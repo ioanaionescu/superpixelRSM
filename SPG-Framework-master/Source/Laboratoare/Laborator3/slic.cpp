@@ -459,7 +459,7 @@ vector<Superpixel> Slic::getSuperpixels(cv::Mat& image, cv::Mat& imageN, cv::Mat
     /* Fill in. */
     for (int i = 0; i < image.cols; i++) {
         for (int j = 0; j < image.rows; j++) {
-            image.at<Vec3f>(j, i) = cv::Vec3f(0.2f,0.2f,0.2f);//colours[clusters[i][j]];;
+            image.at<Vec3f>(j, i) = cv::Vec3f(0.0f);//colours[clusters[i][j]];;
             imageN.at<Vec3f>(j, i) = cv::Vec3f(0.0f);
             imageP.at<Vec3f>(j, i) = cv::Vec3f(0.0f);
         }
@@ -494,9 +494,9 @@ vector<Superpixel> Slic::getSuperpixels(cv::Mat& image, cv::Mat& imageN, cv::Mat
             superpixels.push_back(superpixel);
 
 
-            cv::circle(image, cv::Point2d(centers[i][3], centers[i][4]), 2, cv::Scalar(colours[i][0], colours[i][1], colours[i][2]), 2);
-            cv::circle(imageN, cv::Point2d(centers[i][3], centers[i][4]), 2, cv::Scalar(coloursN[i][0], coloursN[i][1], coloursN[i][2]), 2);
-            cv::circle(imageP, cv::Point2d(centers[i][3], centers[i][4]), 2, cv::Scalar(coloursP[i][0], coloursP[i][1], coloursP[i][2]), 2);
+            cv::circle(image, cv::Point2d(centers[i][3], centers[i][4]), 4, cv::Scalar(colours[i][0], colours[i][1], colours[i][2]), 7);
+            cv::circle(imageN, cv::Point2d(centers[i][3], centers[i][4]), 4, cv::Scalar(coloursN[i][0], coloursN[i][1], coloursN[i][2]), 7);
+            cv::circle(imageP, cv::Point2d(centers[i][3], centers[i][4]), 4, cv::Scalar(coloursP[i][0], coloursP[i][1], coloursP[i][2]), 7);
         }
         
     }

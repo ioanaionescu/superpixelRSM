@@ -78,6 +78,8 @@
     <ClInclude Include="..\Source\Laboratoare\Laborator7\Laborator7.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Source\Laboratoare\Laborator1\BlenderShaders\FragmentShader.glsl" />
+    <None Include="..\Source\Laboratoare\Laborator1\BlenderShaders\VertexShader.glsl" />
     <None Include="..\Source\Laboratoare\Laborator1\Shaders\FragmentShader.glsl" />
     <None Include="..\Source\Laboratoare\Laborator1\Shaders\GeometryShader.glsl" />
     <None Include="..\Source\Laboratoare\Laborator1\Shaders\VertexShader.glsl" />

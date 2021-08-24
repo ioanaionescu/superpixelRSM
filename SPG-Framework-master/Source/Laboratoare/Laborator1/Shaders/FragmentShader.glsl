@@ -61,9 +61,10 @@ vec3 ambientLightAllPixelsWRONG() // varianta cu texelFetch care da erroare
 	ivec2 size = textureSize(flux_texture, 0);
 	height = size.y;
 	width = size.x;
-	for (int i = 0; i < 100; i++) // adca in loc de 100 e height/width primesc eroare de 
+	int row = 31;
+	for (int i = (row + 0) * 32; i < (row + 1) * 32; i++) // adca in loc de 100 e height/width primesc eroare de 
 	{
-		for (int j = 0; j < 100; j++) { 
+		for (int j = (row + 0) * 32; j < (row + 1) * 32; j++) {
 			ivec2 coord = ivec2(j, i);
 			vec3 flux = texelFetch(flux_texture, coord , 0).rgb;
 			vec3 x_p = texelFetch(positions_texture, coord , 0).rgb;
@@ -150,9 +151,10 @@ vec3 ambientLight2() //Aria
 
 	vec3 n = normalize(world_normal);
 	vec3 x = world_position;
-	float Adisk = 3 * 3 * PI;
+	//float Adisk = 1 * 1 * PI;
 	for (int i = 0; i < superpixels_total; i++)
 	{
+		float Adisk = data[i].weight.x * 1000;
 		vec3 flux = data[i].color.xyz; // 
 		vec3 x_p = data[i].position.xyz;
 		vec3 n_p = data[i].normal.xyz;
@@ -243,16 +245,16 @@ void main()
 	vec3 ambient;
 	switch (switchToSuperpixels) {
 	case 1: // RSM 
-		ambient = ambientLight() * 0.4;
+		ambient = ambientLight() * 0.17;
 		break;
 	case 2: // RSMC -> cu aria
-		ambient = ambientLight2() * 0.003;
+		ambient = ambientLight2() * 0.009;
 		break;
 	case 3: // exaluare toti pixeli texelFetch
-		ambient = ambientLightAllPixelsWRONG() * 0.3;
+		ambient = ambientLightAllPixelsWRONG() * 900;
 		break;
 	default: // exaluare toti pixeli texture 
-		ambient = ambientLightAllPixels() * 0.003;
+		ambient = ambientLightAllPixels() * 0.001;
 	}
  
 

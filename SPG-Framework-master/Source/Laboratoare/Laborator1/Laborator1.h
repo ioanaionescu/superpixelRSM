@@ -28,8 +28,11 @@ class Laborator1 : public SimpleScene
 		void DrawScene(Shader* shader);
 		void DrawScene();
 		void RenderScene(Shader* shader, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
+		cv::Mat readAmbientLight();
 		void Update1(float deltaTimeSeconds);
 		void RenderScene();
+		void RenderSegments();
+		void notBlack(cv::Mat& image);
 		void Update(float deltaTimeSeconds) override;
 		void FrameEnd() override;
 
@@ -47,6 +50,7 @@ class Laborator1 : public SimpleScene
 		unsigned int maxInstances;
 		float shrink;
 		FrameBuffer* frameBuffer;
+		FrameBuffer* frameBufferAmbient;
 		unsigned int depthMapFBO;
 		const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024, SCR_WIDTH = 1280, SCR_HEIGHT = 720;
 		unsigned int depthMap;

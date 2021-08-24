@@ -70,6 +70,9 @@
     <Filter Include="Laboratoare\Laborator1\SLICShaders">
       <UniqueIdentifier>{5574075c-8275-4241-ad2c-4c3d25bc39f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Laboratoare\Laborator1\BlenderShaders">
+      <UniqueIdentifier>{9d55e276-8e1d-4a6a-92a7-cb6411ba3989}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Core\Engine.cpp">
@@ -325,6 +328,12 @@
     </None>
     <None Include="..\Source\Laboratoare\Laborator5\Shaders\Simple.VS.glsl">
       <Filter>Laboratoare\Laborator5\Shaders</Filter>
+    </None>
+    <None Include="..\Source\Laboratoare\Laborator1\BlenderShaders\FragmentShader.glsl">
+      <Filter>Laboratoare\Laborator1\BlenderShaders</Filter>
+    </None>
+    <None Include="..\Source\Laboratoare\Laborator1\BlenderShaders\VertexShader.glsl">
+      <Filter>Laboratoare\Laborator1\BlenderShaders</Filter>
     </None>
   </ItemGroup>
 </Project>

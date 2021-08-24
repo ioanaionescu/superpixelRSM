@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 // Order of function calling can be seen in "Source/Core/World.cpp::LoopUpdate()"
 // https://github.com/UPB-Graphics/SPG-Framework/blob/master/Source/Core/World.cpp
 
@@ -27,10 +26,10 @@ void Laborator1::Init()
 	shrink = 0;
 	
 	auto camera = GetSceneCamera();
-	camera->SetPositionAndRotation(glm::vec3(5,5,5), glm::quat(glm::vec3(0)));
-	camera->SetRotation(glm::quat(0.906538, -0.205128, 0.35984, 0.0814233));
-	//camera->SetPositionAndRotation(glm::vec3(4.5, 2, 0), glm::quat(glm::vec3(0)));
-	//camera->SetRotation(glm::quat(0.696596, -0.040775, 0.71508, 0.0418567));
+	//camera->SetPositionAndRotation(glm::vec3(5,5,5), glm::quat(glm::vec3(0)));
+	//camera->SetRotation(glm::quat(0.906538, -0.205128, 0.35984, 0.0814233));
+	camera->SetPositionAndRotation(glm::vec3(4.5, 2, 0), glm::quat(glm::vec3(0)));
+	camera->SetRotation(glm::quat(0.696596, -0.040775, 0.71508, 0.0418567));
 	camera->Update();
 
 	
@@ -64,6 +63,15 @@ void Laborator1::Init()
 	{
 		shaderPath = "Source/Laboratoare/Laborator1/SLICShaders/";
 		Shader* shader = new Shader("SLIC");
+		shader->AddShader(shaderPath + "VertexShader.glsl", GL_VERTEX_SHADER);
+		shader->AddShader(shaderPath + "FragmentShader.glsl", GL_FRAGMENT_SHADER);
+		shader->CreateAndLink();
+		shaders[shader->GetName()] = shader;
+	}
+
+	{
+		shaderPath = "Source/Laboratoare/Laborator1/BlenderShaders/";
+		Shader* shader = new Shader("Blender");
 		shader->AddShader(shaderPath + "VertexShader.glsl", GL_VERTEX_SHADER);
 		shader->AddShader(shaderPath + "FragmentShader.glsl", GL_FRAGMENT_SHADER);
 		shader->CreateAndLink();
@@ -293,19 +301,8 @@ void Laborator1::RenderScene(Shader* shader, glm::mat4 viewMatrix, glm::mat4 pro
 	// render an object using the specified shader and the specified position
 	shader->Use();
 
-
-	//GLuint block_index = 0;
-	//block_index = glGetProgramResourceIndex(shader->program, GL_SHADER_STORAGE_BLOCK, "superpixels");
-
-	//GLuint ssbo_binding_point_index = 3;
-	//glShaderStorageBlockBinding(shader->program, block_index, ssbo_binding_point_index);
-
-
-
-	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
 	ssbo->BindBuffer(0);
 
-	/*glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));*/
 	glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix)); //lightProjection
 
@@ -366,11 +363,9 @@ void Laborator1::RenderScene(Shader* shader, glm::mat4 viewMatrix, glm::mat4 pro
 	GLint lightSM = glGetUniformLocation(shader->program, "lightSpaceMatrix");
 	glUniformMatrix4fv(lightSM, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-
-
 	glm::mat4 model(1);
 	model = glm::translate(model, glm::vec3(0.0f));
-	model = glm::scale(model, glm::vec3(0.01f));
+	model = glm::scale(model, glm::vec3(0.007f));
 	model = glm::rotate(model, 45.0f, glm::vec3(0, 1, 0));
 
 	glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(model));
@@ -378,16 +373,107 @@ void Laborator1::RenderScene(Shader* shader, glm::mat4 viewMatrix, glm::mat4 pro
 
 	model = glm::mat4(1);
 	model = glm::translate(model, glm::vec3(0.0f));
-	model = glm::scale(model, glm::vec3(2.0f));
+	model = glm::scale(model, glm::vec3(1.4f));
 	glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(model));
 	meshes["cornellBox"]->Render(shader);
 }
 
+cv::Mat Laborator1::readAmbientLight() {
+	/*frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
+	cv::Mat pixels(1024, 1024, CV_32FC3);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, pixels.data);
+	
+	cv::Mat cv_pixels(1, 1, CV_32FC3);
 
+	cv_pixels.at<cv::Vec3f>(0, 0)[2] = pixels.at<cv::Vec3f>(0, 0)[0];
+	cv_pixels.at<cv::Vec3f>(0, 0)[1] = pixels.at<cv::Vec3f>(0, 0)[1];
+	cv_pixels.at<cv::Vec3f>(0, 0)[0] = pixels.at<cv::Vec3f>(0, 0)[2];
+
+
+	return cv_pixels;*/
+
+	frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
+	cv::Mat pixels(SHADOW_HEIGHT, SHADOW_WIDTH, CV_32FC3);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, pixels.data);//
+	
+	cv::Mat cv_pixels(SHADOW_HEIGHT, SHADOW_WIDTH, CV_32FC3);
+	for (int y = 0; y < SHADOW_HEIGHT; y++)
+		for (int x = 0; x < SHADOW_WIDTH; x++)
+		{
+			cv_pixels.at<cv::Vec3f>(y, x)[2] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[0];//
+			cv_pixels.at<cv::Vec3f>(y, x)[1] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[1];
+			cv_pixels.at<cv::Vec3f>(y, x)[0] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[2];
+		}
+
+	return cv_pixels;
+}
+
+void Laborator1::RenderSegments() 
+{
+
+	frameBufferAmbient = new FrameBuffer();
+	frameBufferAmbient->Generate(1024, 1024, 1, false);
+
+	Vec3f ambient = Vec3f(0.0f);
+
+	auto camera = GetSceneCamera();
+	auto shader = shaders["Blender"];
+
+	frameBufferAmbient->Bind();
+	cv::Mat image;
+
+	shader->Use();
+	
+
+	for (int i = 0; i <  32 ; i++) { // 1024 / 32
+		for (int j = 0; j < 32; j++) {
+			GLint row = glGetUniformLocation(shader->program, "row");
+			glUniform1i(row, i);
+			glUniform1i(row, i);
+
+			GLint column = glGetUniformLocation(shader->program, "column");
+			glUniform1i(column, j);
+
+			//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+			RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
+			// citim valoare RGB a ambient light si acumulam
+			//image_color = readImagePixels(0);
+			image = readAmbientLight();
+			String name = std::to_string(i) + std::to_string(j) + "IM.jpg";
+			//functie cu care printam imaginile sa vad cum e rezultatul, inclusiv culoarea
+			cv::imwrite(name, image * 255);
+			//notBlack(image);
+			//aici coordonatele (280,0 ) le-am pus fiindca imi intorcea o imagine dubioasa, cred ca datorita erorii
+			//in shader ii dadeam sa imi intoarca niste valori predefinite, de exemplu daca randul era 2 put_color sa fie rosu
+			//sau tot asa..sa ma asigur ca se transmitea bine randul si coloana si ca imaginea intoarsa era buna
+			ambient += readAmbientLight().at<cv::Vec3f>(280, 0);
+			//frameBufferAmbient->Bind();
+			//shader->Use();
+		}
+	}
+	if (ambient != Vec3f(0.0)) {
+		//cout << ambient << endl;
+	}
+	// am ambient light si il pasez in shader normal
+
+}
+
+void Laborator1::notBlack(cv::Mat& image) {
+	Vec3f rgb;
+	for (int i = 0; i < image.cols; i++) {
+		for (int j = 0; j < image.rows; j++) {
+			rgb=image.at<Vec3f>(j, i);
+			if (rgb != Vec3f(0.0)) {
+				//cout << rgb<<endl;
+			}
+		}
+	}
+}
 
 void Laborator1::Update(float deltaTimeSeconds)
 {
-
 	{
 		auto shader = shaders["Instances"];
 		
@@ -397,12 +483,20 @@ void Laborator1::Update(float deltaTimeSeconds)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
+		RenderSegments();
+		//RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
 
 
 	}
 }
 
+//oid Laborator1::RenderCompleteRSM() {
+	//setez fb
+	//blending settings
+	// poate alt shader?
+	// setari contor..
+	//
+//}
 void Laborator1::FrameEnd()
 {
 	//DrawCoordinatSystem();
