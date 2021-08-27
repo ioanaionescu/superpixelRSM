@@ -81,6 +81,7 @@ void Laborator1::Init()
 	DrawRSM();
 	// Render from light pov and SLIC
 	SLIC();
+	RenderSegments();
 	
 
 }
