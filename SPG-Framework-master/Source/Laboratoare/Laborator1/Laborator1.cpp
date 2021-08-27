@@ -393,16 +393,17 @@ cv::Mat Laborator1::readAmbientLight() {
 	return cv_pixels;*/
 
 	frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
-	cv::Mat pixels(SHADOW_HEIGHT, SHADOW_WIDTH, CV_32FC3);
+	cv::Mat pixels(window->props.resolution.y, window->props.resolution.x, CV_32FC3);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, pixels.data);//
-	
-	cv::Mat cv_pixels(SHADOW_HEIGHT, SHADOW_WIDTH, CV_32FC3);
-	for (int y = 0; y < SHADOW_HEIGHT; y++)
-		for (int x = 0; x < SHADOW_WIDTH; x++)
+	//glReadPixels(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT, GL_RGB, GL_FLOAT, pixels.data);
+
+	cv::Mat cv_pixels(window->props.resolution.y, window->props.resolution.x, CV_32FC3);
+	for (int y = 0; y < window->props.resolution.y; y++)
+		for (int x = 0; x < window->props.resolution.x; x++)
 		{
-			cv_pixels.at<cv::Vec3f>(y, x)[2] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[0];//
-			cv_pixels.at<cv::Vec3f>(y, x)[1] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[1];
-			cv_pixels.at<cv::Vec3f>(y, x)[0] = pixels.at<cv::Vec3f>(SHADOW_HEIGHT - y - 1, x)[2];
+			cv_pixels.at<cv::Vec3f>(y, x)[2] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[0];//
+			cv_pixels.at<cv::Vec3f>(y, x)[1] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[1];
+			cv_pixels.at<cv::Vec3f>(y, x)[0] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[2];
 		}
 
 	return cv_pixels;
@@ -411,8 +412,11 @@ cv::Mat Laborator1::readAmbientLight() {
 void Laborator1::RenderSegments() 
 {
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
 	frameBufferAmbient = new FrameBuffer();
-	frameBufferAmbient->Generate(1024, 1024, 1, false);
+	frameBufferAmbient->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
 
 	Vec3f ambient = Vec3f(0.0f);
 
@@ -425,34 +429,41 @@ void Laborator1::RenderSegments()
 	shader->Use();
 	
 
-	for (int i = 0; i <  32 ; i++) { // 1024 / 32
-		for (int j = 0; j < 32; j++) {
+	for (int i = 0; i <  16 ; i++) { // 1024 / 32
+		for (int j = 0; j < 16; j++) {
 			GLint row = glGetUniformLocation(shader->program, "row");
-			glUniform1i(row, i);
+			//glUniform1i(row, i);
 			glUniform1i(row, i);
 
 			GLint column = glGetUniformLocation(shader->program, "column");
 			glUniform1i(column, j);
-
+			cout << "row"<<i<<"col"<<j << endl;
 			//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 			//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+			//frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
 
 			RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
 			// citim valoare RGB a ambient light si acumulam
 			//image_color = readImagePixels(0);
-			image = readAmbientLight();
-			String name = std::to_string(i) + std::to_string(j) + "IM.jpg";
-			//functie cu care printam imaginile sa vad cum e rezultatul, inclusiv culoarea
-			cv::imwrite(name, image * 255);
-			//notBlack(image);
-			//aici coordonatele (280,0 ) le-am pus fiindca imi intorcea o imagine dubioasa, cred ca datorita erorii
-			//in shader ii dadeam sa imi intoarca niste valori predefinite, de exemplu daca randul era 2 put_color sa fie rosu
-			//sau tot asa..sa ma asigur ca se transmitea bine randul si coloana si ca imaginea intoarsa era buna
-			ambient += readAmbientLight().at<cv::Vec3f>(280, 0);
+
 			//frameBufferAmbient->Bind();
 			//shader->Use();
+			glFinish();
 		}
 	}
+	image = readAmbientLight();
+	String name = "final.jpg";
+	//functie cu care printam imaginile sa vad cum e rezultatul, inclusiv culoarea
+	cv::imwrite(name, image * 255);
+	//notBlack(image);
+	//aici coordonatele (280,0 ) le-am pus fiindca imi intorcea o imagine dubioasa, cred ca datorita erorii
+	//in shader ii dadeam sa imi intoarca niste valori predefinite, de exemplu daca randul era 2 put_color sa fie rosu
+	//sau tot asa..sa ma asigur ca se transmitea bine randul si coloana si ca imaginea intoarsa era buna
+	//ambient += readAmbientLight().at<cv::Vec3f>(280, 0);
+
+
+	//image = readAmbientLight();
+	//cv::imwrite("ambientLight.jpg", image );
 	if (ambient != Vec3f(0.0)) {
 		//cout << ambient << endl;
 	}
@@ -483,8 +494,8 @@ void Laborator1::Update(float deltaTimeSeconds)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		RenderSegments();
-		//RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
+		
+		RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
 
 
 	}

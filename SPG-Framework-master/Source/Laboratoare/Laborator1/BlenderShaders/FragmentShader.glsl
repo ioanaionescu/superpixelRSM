@@ -64,9 +64,9 @@ vec3 ambientLightAllPixels()
 	//ivec2 size = textureSize(flux_texture, 0);
 	//height = size.y;
 	//width = size.x;
-	for (int i = row * 32 ; i < (row + 1) * 32; i++) 
+	for (int i = row * 64 ; i < (row + 1) * 64; i++) 
 	{
-		for (int j = column * 32; j < (column + 1) * 32; j++) {
+		for (int j = column * 64; j < (column + 1) * 64; j++) {
 			ivec2 coord = ivec2(j, i);
 			vec3 flux = texelFetch(flux_texture, coord, 0).rgb;
 			vec3 x_p = texelFetch(positions_texture, coord, 0).rgb;
@@ -92,8 +92,8 @@ void main()
 	//ambient
 	vec3 ambient;
 
-	ambient = ambientLightAllPixels();
-	out_color = ambient;
+	ambient = ambientLightAllPixels();	
+	out_color = ambient / (1024 * 1024) * 100;
 
 	//float rand = row /32;
 	//float coloana = column /32;
