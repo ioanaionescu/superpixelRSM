@@ -243,20 +243,23 @@ void main()
 	//```````````````````````````````````````
 	//ambient
 	vec3 ambient;
-	switch (switchToSuperpixels) {
-	case 1: // RSM 
-		ambient = ambientLight() * 0.17;
-		break;
-	case 2: // RSMC -> cu aria
-		ambient = ambientLight2() * 0.009;
-		break;
-	case 3: // exaluare toti pixeli texelFetch
-		ambient = ambientLightAllPixelsWRONG() * 900;
-		break;
-	default: // exaluare toti pixeli texture 
-		ambient = ambientLightAllPixels() * 0.001;
-	}
+	ambient = ambientLight();
+	//switch (switchToSuperpixels) {
+	//case 1: // RSM 
+	//	ambient *= 0.17;
+	//	break;
+	//case 2: // RSMC -> cu aria
+	//	ambient *= 1;
+	//	break;
+	//case 3: // exaluare toti pixeli texelFetch
+	//	ambient *= 5;
+	//	break;
+	//default: // exaluare toti pixeli texture 
+	//	ambient *= 10;
+	//}
  
+
+
 
 	//diffuse
 	vec3 lightColor = vec3(1.0);
@@ -267,7 +270,9 @@ void main()
 
 	vec3 lighting = (ambient  + shadow * (diffuse + specular)) * color_texture ;
 
-	out_color = lighting;
+	//out_color = lighting;
+
+	out_color = ambient * 5;
 
 
 

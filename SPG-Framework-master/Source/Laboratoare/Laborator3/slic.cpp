@@ -468,7 +468,8 @@ vector<Superpixel> Slic::getSuperpixels(cv::Mat& image, cv::Mat& imageN, cv::Mat
     int total_superpixels = 0;
     for (int i = 0; i < (int)centers.size(); i++) {
         // x, y, B, G, R
-        if (cv::Vec3f(colours[i][0], colours[i][1], colours[i][2]) != cv::Vec3f(0.0f))
+        // scos pixelii negri
+       // if (cv::Vec3f(colours[i][0], colours[i][1], colours[i][2]) != cv::Vec3f(0.0f))
         {
             nr_superpixels++;
             myfile << centers[i][3] << " " << centers[i][4]; // x y

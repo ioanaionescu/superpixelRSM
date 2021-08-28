@@ -51,6 +51,7 @@ class Laborator1 : public SimpleScene
 		float shrink;
 		FrameBuffer* frameBuffer;
 		FrameBuffer* frameBufferAmbient;
+		FrameBuffer* frameBufferQuad;
 		unsigned int depthMapFBO;
 		const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024, SCR_WIDTH = 1280, SCR_HEIGHT = 720;
 		unsigned int depthMap;

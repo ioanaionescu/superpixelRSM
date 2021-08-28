@@ -78,6 +78,15 @@ void Laborator1::Init()
 		shaders[shader->GetName()] = shader;
 	}
 
+	{
+		shaderPath = "Source/Laboratoare/Laborator7/Shaders/";
+		Shader* shader = new Shader("ImageProcessing");
+		shader->AddShader(shaderPath + "VertexShader.glsl", GL_VERTEX_SHADER);
+		shader->AddShader(shaderPath + "FragmentShader.glsl", GL_FRAGMENT_SHADER);
+		shader->CreateAndLink();
+		shaders[shader->GetName()] = shader;
+	}
+
 	DrawRSM();
 	// Render from light pov and SLIC
 	SLIC();
@@ -433,42 +442,57 @@ void Laborator1::RenderSegments()
 	for (int i = 0; i <  16 ; i++) { // 1024 / 32
 		for (int j = 0; j < 16; j++) {
 			GLint row = glGetUniformLocation(shader->program, "row");
-			//glUniform1i(row, i);
 			glUniform1i(row, i);
 
 			GLint column = glGetUniformLocation(shader->program, "column");
 			glUniform1i(column, j);
 			cout << "row"<<i<<"col"<<j << endl;
-			//glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-			//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-			//frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
 
 			RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
-			// citim valoare RGB a ambient light si acumulam
-			//image_color = readImagePixels(0);
-
-			//frameBufferAmbient->Bind();
-			//shader->Use();
 			glFinish();
 		}
 	}
 	image = readAmbientLight();
 	String name = "final.jpg";
-	//functie cu care printam imaginile sa vad cum e rezultatul, inclusiv culoarea
 	cv::imwrite(name, image * 255);
-	//notBlack(image);
-	//aici coordonatele (280,0 ) le-am pus fiindca imi intorcea o imagine dubioasa, cred ca datorita erorii
-	//in shader ii dadeam sa imi intoarca niste valori predefinite, de exemplu daca randul era 2 put_color sa fie rosu
-	//sau tot asa..sa ma asigur ca se transmitea bine randul si coloana si ca imaginea intoarsa era buna
-	//ambient += readAmbientLight().at<cv::Vec3f>(280, 0);
+
+	// Al doilea frameBuffer 
+	{
+
+		auto shader = shaders["ImageProcessing"];
+		shader->Use();
+
+		glDisable(GL_BLEND);
+		frameBufferQuad = new FrameBuffer();
+		frameBufferQuad->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
+
+		frameBufferQuad->Bind();
+		frameBufferAmbient->BindTexture(0, GL_TEXTURE9);
+		//frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
+
+		int locTexture = shader->GetUniformLocation("textureImage");
+		glUniform1i(locTexture, 9);
+
+		RenderMesh(meshes["quad"], shader, glm::mat4(1));
+
+		//citire textura si salvare ca jpg
+		frameBufferQuad->BindTexture(0, GL_TEXTURE_2D);
+		cv::Mat pixels(window->props.resolution.y, window->props.resolution.x, CV_32FC3);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, pixels.data);
+
+		cv::Mat cv_pixels(window->props.resolution.y, window->props.resolution.x, CV_32FC3);
+		for (int y = 0; y < window->props.resolution.y; y++)
+			for (int x = 0; x < window->props.resolution.x; x++)
+			{
+				cv_pixels.at<cv::Vec3f>(y, x)[2] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[0];//
+				cv_pixels.at<cv::Vec3f>(y, x)[1] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[1];
+				cv_pixels.at<cv::Vec3f>(y, x)[0] = pixels.at<cv::Vec3f>(window->props.resolution.y - y - 1, x)[2];
+			}
+
+		cv::imwrite("quad.jpg", cv_pixels * 255);
 
 
-	//image = readAmbientLight();
-	//cv::imwrite("ambientLight.jpg", image );
-	if (ambient != Vec3f(0.0)) {
-		//cout << ambient << endl;
 	}
-	// am ambient light si il pasez in shader normal
 
 }
 
@@ -491,6 +515,7 @@ void Laborator1::Update(float deltaTimeSeconds)
 		
 		auto camera = GetSceneCamera();
 		//cout << camera->GetViewMatrix() <<endl;
+		glDisable(GL_BLEND);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);

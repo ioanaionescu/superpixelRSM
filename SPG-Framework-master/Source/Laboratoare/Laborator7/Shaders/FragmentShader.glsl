@@ -9,7 +9,7 @@ uniform int flipVertical;
 // 0 - original
 // 1 - grayscale
 // 2 - blur
-uniform int outputMode = 2;
+uniform int outputMode = 0;
 
 // Flip texture horizontally when
 vec2 textureCoord = vec2(texture_coord.x, (flipVertical != 0) ? 1 - texture_coord.y : texture_coord.y);

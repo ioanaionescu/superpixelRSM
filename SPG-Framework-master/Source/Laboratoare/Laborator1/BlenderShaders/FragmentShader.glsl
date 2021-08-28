@@ -93,7 +93,7 @@ void main()
 	vec3 ambient;
 
 	ambient = ambientLightAllPixels();	
-	out_color = ambient / (1024 * 1024) * 100;
+	out_color = ambient / (1024 * 1024) * 50;
 
 	//float rand = row /32;
 	//float coloana = column /32;
