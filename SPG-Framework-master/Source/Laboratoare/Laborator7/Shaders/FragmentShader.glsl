@@ -3,6 +3,7 @@
 layout(location = 0) in vec2 texture_coord;
 
 uniform sampler2D textureImage;
+uniform sampler2D textureImage2;
 uniform ivec2 screenSize;
 uniform int flipVertical;
 
@@ -41,7 +42,7 @@ vec4 blur(int blurRadius)
 
 void main()
 {
-	switch (outputMode)
+	/*switch (outputMode)
 	{
 		case 1:
 		{
@@ -57,6 +58,9 @@ void main()
 
 		default:
 			out_color = texture(textureImage, textureCoord);
+			out_color += texture(textureImage2, textureCoord);
 			break;
-	}
+	}*/
+	out_color = texture(textureImage, textureCoord);
+	out_color += texture(textureImage2, textureCoord);
 }

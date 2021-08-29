@@ -422,8 +422,8 @@ cv::Mat Laborator1::readAmbientLight() {
 void Laborator1::RenderSegments() 
 {
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
 
 	frameBufferAmbient = new FrameBuffer();
 	frameBufferAmbient->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
@@ -437,10 +437,18 @@ void Laborator1::RenderSegments()
 	cv::Mat image;
 
 	shader->Use();
+
+	//Al doilea FB
+	frameBufferQuad = new FrameBuffer();
+	frameBufferQuad->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
+	auto shader2 = shaders["ImageProcessing"];
+
+	frameBufferAmbient->Bind();
 	
 
 	for (int i = 0; i <  16 ; i++) { // 1024 / 32
 		for (int j = 0; j < 16; j++) {
+			shader->Use();
 			GLint row = glGetUniformLocation(shader->program, "row");
 			glUniform1i(row, i);
 
@@ -448,7 +456,23 @@ void Laborator1::RenderSegments()
 			glUniform1i(column, j);
 			cout << "row"<<i<<"col"<<j << endl;
 
+			frameBufferAmbient->Bind();
 			RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
+			glFinish();
+
+			//Acumulare
+			shader2->Use();
+
+			frameBufferAmbient->BindTexture(0, GL_TEXTURE9);
+			int locTexture = shader2->GetUniformLocation("textureImage");
+			glUniform1i(locTexture, 9);
+
+			frameBufferQuad->BindTexture(0, GL_TEXTURE10);
+			int locTexture2 = shader2->GetUniformLocation("textureImage2");
+			glUniform1i(locTexture2, 10);
+
+			frameBufferQuad->Bind();
+			RenderMesh(meshes["quad"], shader2, glm::mat4(1));
 			glFinish();
 		}
 	}
@@ -459,21 +483,21 @@ void Laborator1::RenderSegments()
 	// Al doilea frameBuffer 
 	{
 
-		auto shader = shaders["ImageProcessing"];
-		shader->Use();
+		//auto shader = shaders["ImageProcessing"];
+		//shader->Use();
 
-		glDisable(GL_BLEND);
-		frameBufferQuad = new FrameBuffer();
-		frameBufferQuad->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
+		//glDisable(GL_BLEND);
+		//frameBufferQuad = new FrameBuffer();
+		//frameBufferQuad->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
 
-		frameBufferQuad->Bind();
-		frameBufferAmbient->BindTexture(0, GL_TEXTURE9);
-		//frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
+		//frameBufferQuad->Bind();
+		//frameBufferAmbient->BindTexture(0, GL_TEXTURE9);
+		////frameBufferAmbient->BindTexture(0, GL_TEXTURE_2D);
 
-		int locTexture = shader->GetUniformLocation("textureImage");
-		glUniform1i(locTexture, 9);
+		//int locTexture = shader->GetUniformLocation("textureImage");
+		//glUniform1i(locTexture, 9);
 
-		RenderMesh(meshes["quad"], shader, glm::mat4(1));
+		//RenderMesh(meshes["quad"], shader, glm::mat4(1));
 
 		//citire textura si salvare ca jpg
 		frameBufferQuad->BindTexture(0, GL_TEXTURE_2D);
