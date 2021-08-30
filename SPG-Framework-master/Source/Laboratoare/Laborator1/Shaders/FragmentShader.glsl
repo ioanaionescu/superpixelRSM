@@ -272,7 +272,7 @@ void main()
 
 	//out_color = lighting;
 
-	out_color = ambient * 5;
+	out_color = ambient * switchToSuperpixels;
 
 
 

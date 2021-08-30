@@ -47,6 +47,12 @@ void Laborator1::Init()
 		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Lucy", "Winged_Victory.obj");
 		meshes[mesh->GetMeshID()] = mesh;
 	}
+	{
+		Mesh* mesh = new Mesh("quad");
+		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Primitives", "quad.obj");
+		mesh->UseMaterials(false);
+		meshes[mesh->GetMeshID()] = mesh;
+	}
 
 	std::string shaderPath = "Source/Laboratoare/Laborator1/Shaders/";
 	//std::string shaderPath = "Source/Laboratoare/Laborator3/Shaders/";
@@ -90,7 +96,7 @@ void Laborator1::Init()
 	DrawRSM();
 	// Render from light pov and SLIC
 	SLIC();
-	RenderSegments();
+	//RenderSegments();
 	
 
 }
@@ -426,7 +432,7 @@ void Laborator1::RenderSegments()
 	//glBlendFunc(GL_ONE, GL_ONE);
 
 	frameBufferAmbient = new FrameBuffer();
-	frameBufferAmbient->Generate(window->props.resolution.x, window->props.resolution.y, 1, false);
+	frameBufferAmbient->Generate(window->props.resolution.x, window->props.resolution.y, 1, true);
 
 	Vec3f ambient = Vec3f(0.0f);
 
@@ -457,6 +463,7 @@ void Laborator1::RenderSegments()
 			cout << "row"<<i<<"col"<<j << endl;
 
 			frameBufferAmbient->Bind();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RenderScene(shader, camera->GetViewMatrix(), camera->GetProjectionMatrix());
 			glFinish();
 
@@ -471,7 +478,7 @@ void Laborator1::RenderSegments()
 			int locTexture2 = shader2->GetUniformLocation("textureImage2");
 			glUniform1i(locTexture2, 10);
 
-			frameBufferQuad->Bind();
+			frameBufferQuad->Bind(false);
 			RenderMesh(meshes["quad"], shader2, glm::mat4(1));
 			glFinish();
 		}
@@ -613,6 +620,16 @@ void Laborator1::OnKeyPress(int key, int mods)
 	if (key == GLFW_KEY_4)
 	{
 		switchToSuperpixels = 4;
+	}
+
+	if (key == GLFW_KEY_K)
+	{
+		switchToSuperpixels++;
+	}
+
+	if (key == GLFW_KEY_L)
+	{
+		switchToSuperpixels--;
 	}
 };
 
